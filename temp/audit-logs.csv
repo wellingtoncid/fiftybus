@@ -1,0 +1,3 @@
+ID,User ID,Action,Entity,Entity ID,Metadata,Date
+d56167e9-e8ff-4f2c-abea-a3325cb6d649,,GET /docs,,,"{""ip"":""::1"",""userAgent"":""insomnia/11.2.0""}",Sat Jun 28 2025 00:08:41 GMT-0300 (Brasilia Standard Time)
+0fa12e09-9de6-4d53-b44d-44b2e1bc2fbf,,GET /api/admin/logs/export,,,"{""ip"":""::1"",""userAgent"":""insomnia/11.2.0""}",Sat Jun 28 2025 00:10:00 GMT-0300 (Brasilia Standard Time)

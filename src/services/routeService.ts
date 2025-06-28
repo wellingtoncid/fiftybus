@@ -29,7 +29,10 @@ export async function deactivateRoute(id: string) {
     data: { isActive: false },
   });
 }
-export function updateRoute(id: string, body: any) {
-  throw new Error('Function not implemented.');
-}
 
+export async function updateRoute(id: string, data: any) {
+  return await prisma.route.update({
+    where: { id },
+    data,
+  });
+}

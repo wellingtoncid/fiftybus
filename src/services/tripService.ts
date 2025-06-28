@@ -1,15 +1,17 @@
 import { PrismaClient, TripStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export async function createTrip(data: {
+type CreateTripInput = {
   routeId: string;
   vehicleId: string;
   departureDate: Date;
   departureTime: string;
   minQuota: number;
   estimatedCost: number;
-}) {
-  return prisma.trip.create({
+};
+
+async function createTrip(data: CreateTripInput): Promise<any> {
+  return await prisma.trip.create({
     data: {
       routeId: data.routeId,
       vehicleId: data.vehicleId,
@@ -24,7 +26,7 @@ export async function createTrip(data: {
   });
 }
 
-export async function getTripById(id: string) {
+async function getTripById(id: string) {
   return prisma.trip.findUnique({
     where: { id },
     include: {
@@ -35,9 +37,25 @@ export async function getTripById(id: string) {
   });
 }
 
-export async function updateTripStatus(id: string, status: TripStatus) {
+async function updateTripStatus(id: string, status: TripStatus) {
   return prisma.trip.update({
     where: { id },
     data: { status },
   });
 }
+
+async function listTrips() {
+  return await prisma.trip.findMany({
+    include: {
+      route: true,
+      vehicle: true,
+    },
+  });
+}
+
+export const tripService = {
+  createTrip,
+  getTripById,
+  updateTripStatus,
+  listTrips,
+};  

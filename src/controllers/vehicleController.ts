@@ -1,62 +1,60 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { vehicleService } from '../services/vehicleService';
 
-const prisma = new PrismaClient();
-
-const vehicleController = {
+export const vehicleController = {
   async createVehicle(req: Request, res: Response) {
-    try {
-      const data = req.body;
-      const vehicle = await prisma.vehicle.create({ data });
-      return res.status(201).json(vehicle);
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to create vehicle' });
-    }
-  },
+  try {
+    const vehicle = await vehicleService.createVehicle(req.body);
+    res.locals.entityId = vehicle.id;
+    res.locals.metadata = { plate: vehicle.plate };
+    res.status(201).json(vehicle);
+  } catch (err) {
+    console.error("🚨 Erro ao criar veículo:", err); 
+    res.status(400).json({ error: "Failed to create vehicle", details: err });
+  }
+},
 
   async getVehicleById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+      const vehicle = await vehicleService.getVehicleById(id);
       if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
-      return res.json(vehicle);
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to retrieve vehicle' });
+      res.json(vehicle);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to get vehicle', details: err });
     }
   },
 
   async listVehicles(req: Request, res: Response) {
     try {
-      const vehicles = await prisma.vehicle.findMany();
-      return res.json(vehicles);
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to list vehicles' });
+      const vehicles = await vehicleService.listVehicles();
+      res.json(vehicles);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to list vehicles', details: err });
     }
   },
 
   async updateVehicle(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data = req.body;
-      const updated = await prisma.vehicle.update({
-        where: { id },
-        data,
-      });
-      return res.json(updated);
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to update vehicle' });
+      const vehicle = await vehicleService.updateVehicle(id, req.body);
+      res.locals.entityId = req.params.id;
+      res.locals.metadata = { updatedFields: Object.keys(req.body) };
+      res.json(vehicle);
+    } catch (err) {
+      res.status(400).json({ error: 'Failed to update vehicle', details: err });
     }
   },
 
   async deleteVehicle(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.vehicle.delete({ where: { id } });
-      return res.status(204).send();
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to delete vehicle' });
+      await vehicleService.deleteVehicle(id);
+      res.locals.entityId = id;
+      res.locals.metadata = { action: 'delete' };
+      res.status(204).send();
+    } catch (err) {
+      res.status(400).json({ error: 'Failed to delete vehicle', details: err });
     }
   },
 };
-
-export default vehicleController;

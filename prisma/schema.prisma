@@ -8,46 +8,52 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(uuid())
-  name          String
-  email         String       @unique
-  passwordHash  String
-  role          UserRole
-  phone         String?
-  document      String?
-  photoUrl      String?
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  phone        String?
+  document     String?
+  photoUrl     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  bookings      Booking[]
-  reviews       Review[]
-  vehicles      Vehicle[]     @relation("DriverVehicles")
-  checklists    VehicleCheck[] @relation("CompletedChecklists")
-  reports       Report[]      @relation("GeneratedReports")
-  agent         Agent?
+  bookings   Booking[]
+  reviews    Review[]
+  vehicles   Vehicle[]      @relation("DriverVehicles")
+  reports    Report[]       @relation("GeneratedReports")
+  agent      Agent?
+  
+  TripChecklist TripChecklist[]
+  AuditLog AuditLog[]
 }
 
 enum UserRole {
   passenger
   driver
   agent
+  manager
   admin
 }
 
 model Vehicle {
-  id               String         @id @default(uuid())
-  model            String
-  plate            String         @unique
-  capacity         Int
-  year             Int
-  status           VehicleStatus
-  driver           User           @relation("DriverVehicles", fields: [driverId], references: [id])
-  driverId         String
-  avgRating        Float          @default(0)
-  mileage          Int
+  id         String        @id @default(uuid())
+  model      String
+  brand      String
+  totalSeats Int
+  plate      String        @unique
+  capacity   Int
+  year       Int
+  status     VehicleStatus
+  driver     User          @relation("DriverVehicles", fields: [driverId], references: [id])
+  driverId   String
+  avgRating  Float         @default(0)
+  mileage    Int
 
-  trips            Trip[]
-  checklists       VehicleCheck[]
+  trips             Trip[]
+  TripChecklist TripChecklist[]
 }
 
 enum VehicleStatus {
@@ -57,36 +63,44 @@ enum VehicleStatus {
 }
 
 model Route {
-  id               String   @id @default(uuid())
-  origin           String
-  destination      String
-  estimatedTime    String
-  distanceKm       Float
-  basePrice        Float
-  minPassengers    Int
-  isActive         Boolean   @default(true)
+  id            String  @id @default(uuid())
+  origin        String
+  destination   String
+  estimatedTime String
+  distanceKm    Float
+  basePrice     Float
+  minPassengers Int
+  isActive      Boolean @default(true)
 
-  trips            Trip[]
+  trips Trip[]
+
+  AgentAssignment AgentAssignment[]
 }
 
 model Trip {
-  id               String   @id @default(uuid())
-  route            Route    @relation(fields: [routeId], references: [id])
-  routeId          String
-  vehicle          Vehicle  @relation(fields: [vehicleId], references: [id])
-  vehicleId        String
-  departureDate    DateTime
-  departureTime    String
-  status           TripStatus
-  currentBookings  Int       @default(0)
-  minQuota         Int
-  estimatedCost    Float
-  quorumReached    Boolean   @default(false)
-  confirmedAt      DateTime?
+  id              String     @id @default(uuid())
+  route           Route      @relation(fields: [routeId], references: [id])
+  routeId         String
+  vehicle         Vehicle    @relation(fields: [vehicleId], references: [id])
+  vehicleId       String
+  departureDate   DateTime
+  departureTime   DateTime
+  realDepartureTime DateTime?
+  realArrivalTime   DateTime?
+  status          TripStatus
+  currentBookings Int        @default(0)
+  minQuota        Int
+  estimatedCost   Float
+  finalCost       Float?
+  quorumReached   Boolean    @default(false)
+  confirmedAt     DateTime?
+  notes           String?
 
-  bookings         Booking[]
-  checklists       VehicleCheck[]
-  reviews          Review[]
+  bookings   Booking[]
+  reviews    Review[]
+
+  TripAgentAssignment TripAgentAssignment[]
+  TripChecklist TripChecklist[]
 }
 
 enum TripStatus {
@@ -97,18 +111,21 @@ enum TripStatus {
 }
 
 model Booking {
-  id              String           @id @default(uuid())
-  trip            Trip             @relation(fields: [tripId], references: [id])
-  tripId          String
-  user            User             @relation(fields: [userId], references: [id])
-  userId          String
-  status          BookingStatus
-  amountPaid      Float
-  paymentMethod   PaymentMethod
-  bookedAt        DateTime         @default(now())
-  checkinDone     Boolean          @default(false)
+  id            String        @id @default(uuid())
+  trip          Trip          @relation(fields: [tripId], references: [id])
+  tripId        String
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
+  status        BookingStatus
+  amountPaid    Float
+  paymentMethod PaymentMethod
+  bookedAt      DateTime      @default(now())
+  checkinDone   Boolean       @default(false)
+  seatNumber    Int?
 
-  payment         Payment?
+  payment       Payment?
+  agentId       String?
+  agent         Agent?   @relation(fields: [agentId], references: [id])
 }
 
 enum BookingStatus {
@@ -125,14 +142,14 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id              String         @id @default(uuid())
-  booking         Booking        @relation(fields: [bookingId], references: [id])
-  bookingId       String         @unique
-  gateway         PaymentGateway
-  status          PaymentStatus
-  amount          Float
-  paidAt          DateTime
-  transactionId   String
+  id            String         @id @default(uuid())
+  booking       Booking        @relation(fields: [bookingId], references: [id])
+  bookingId     String         @unique
+  gateway       PaymentGateway
+  status        PaymentStatus
+  amount        Float
+  paidAt        DateTime
+  transactionId String
 }
 
 enum PaymentGateway {
@@ -147,55 +164,101 @@ enum PaymentStatus {
   pending
 }
 
-model VehicleCheck {
+model TripChecklist {
   id              String   @id @default(uuid())
   vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
   vehicleId       String
   trip            Trip     @relation(fields: [tripId], references: [id])
   tripId          String
-  driver          User     @relation("CompletedChecklists", fields: [driverId], references: [id])
+  driver          User     @relation(fields: [driverId], references: [id])
   driverId        String
+  type            ChecklistType
+  initialMileage  Int
+  finalMileage    Int?      // só para end, start não precisa
+  fuelLevel       Int       // vai ser start ou end conforme type
   brakesOk        Boolean
   tiresOk         Boolean
   oilOk           Boolean
+  issuesFound     String?   // só para end
   notes           String?
   checkedAt       DateTime @default(now())
+
+  @@unique([tripId, type])  // evita 2 checklists iguais (start + end) por viagem
+}
+
+enum ChecklistType {
+  start
+  end
 }
 
 model Review {
-  id               String   @id @default(uuid())
-  trip             Trip     @relation(fields: [tripId], references: [id])
-  tripId           String
-  user             User     @relation(fields: [userId], references: [id])
-  userId           String
-  driverRating     Int
-  vehicleRating    Int
-  comments         String?
-  reviewedAt       DateTime @default(now())
+  id            String   @id @default(uuid())
+  trip          Trip     @relation(fields: [tripId], references: [id])
+  tripId        String
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  driverRating  Int
+  vehicleRating Int
+  comments      String?
+  reviewedAt    DateTime @default(now())
 }
 
 model Agent {
-  id               String   @id @default(uuid())
-  user             User     @relation(fields: [userId], references: [id])
-  userId           String   @unique
-  region           String
-  commissionRate   Float
-  totalSales       Int      @default(0)
-  isActive         Boolean  @default(true)
+  id             String  @id @default(uuid())
+  user           User    @relation(fields: [userId], references: [id])
+  userId         String  @unique
+  region         String
+  commissionRate Float
+  totalSales     Int     @default(0)
+  isActive       Boolean @default(true)
+
+  bookings         Booking[]          
+  routeAssignments AgentAssignment[] 
+  tripAssignments  TripAgentAssignment[]
 }
 
 model Report {
-  id               String   @id @default(uuid())
-  type             ReportType
-  startDate        DateTime
-  endDate          DateTime
-  generatedBy      User     @relation("GeneratedReports", fields: [generatedById], references: [id])
-  generatedById    String
-  filePath         String
+  id            String     @id @default(uuid())
+  type          ReportType
+  startDate     DateTime
+  endDate       DateTime
+  generatedBy   User       @relation("GeneratedReports", fields: [generatedById], references: [id])
+  generatedById String
+  filePath      String
 }
 
 enum ReportType {
   sales
   trips
   reviews
+}
+
+model AgentAssignment {
+  id       String  @id @default(uuid())
+  agent    Agent   @relation(fields: [agentId], references: [id])
+  agentId  String
+  route    Route   @relation(fields: [routeId], references: [id])
+  routeId  String
+  assignedAt DateTime @default(now())
+}
+
+model TripAgentAssignment {
+  id       String  @id @default(uuid())
+  agent    Agent   @relation(fields: [agentId], references: [id])
+  agentId  String
+  trip     Trip    @relation(fields: [tripId], references: [id])
+  tripId   String
+  assignedAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  // quem fez a ação
+  action     String   // tipo da ação (ex: "CREATE_BOOKING")
+  entity     String   // entidade afetada (ex: "booking", "user", "trip")
+  entityId   String?  // id da entidade (ex: id da reserva editada)
+  metadata   Json?    // info adicional (ex: status antes/depois)
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id])
 }

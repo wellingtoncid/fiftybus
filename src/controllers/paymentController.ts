@@ -17,6 +17,8 @@ export const paymentController = {
   async create(req: Request, res: Response) {
     try {
       const payment = await paymentService.create(req.body);
+      res.locals.entityId = payment.id;
+      res.locals.metadata = { amount: payment.amount, method: payment.status };
       res.status(201).json(payment);
     } catch (err) {
       res.status(400).json({ error: "Error creating payment", details: err });
@@ -27,6 +29,8 @@ export const paymentController = {
     const { id } = req.params;
     try {
       const payment = await paymentService.update(id, req.body);
+      res.locals.entityId = payment.id;
+      res.locals.metadata = { amount: payment.amount, method: payment.status };
       res.json(payment);
     } catch (err) {
       res.status(400).json({ error: "Error updating payment", details: err });
@@ -37,6 +41,8 @@ export const paymentController = {
     const { id } = req.params;
     try {
       await paymentService.delete(id);
+      res.locals.entityId = id;
+      res.locals.metadata = { action: "delete" };
       res.status(204).send();
     } catch (err) {
       res.status(400).json({ error: "Error deleting payment", details: err });

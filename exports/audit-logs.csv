@@ -1,0 +1,7 @@
+ID,User ID,Action,Entity,Entity ID,Metadata,Timestamp
+0b90429b-a4dd-4c6e-a51a-b33ab95894d6,,GET /api/exports/bookings,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
+e97b73b3-2e8d-4ad9-bf18-7efab71bbe60,,GET /api/exports/logs,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
+ccd8163e-b4c7-4327-8973-c8060201181d,,GET /docs/,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
+07c3435c-dde1-4d1c-b681-c932818a6dea,,GET /docs,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
+0fa12e09-9de6-4d53-b44d-44b2e1bc2fbf,,GET /api/admin/logs/export,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
+d56167e9-e8ff-4f2c-abea-a3325cb6d649,,GET /docs,,,"""{\""ip\"":\""::1\"",\""userAgent\"":\""insomnia/11.2.0\""}""",
