@@ -25,7 +25,9 @@ export const authService = {
         name: data.name,
         email: data.email,
         passwordHash: hashed,
-        role: 'passenger',
+        role: Object.values(UserRole).includes(data.role as UserRole)
+          ? (data.role as UserRole)
+          : 'passenger',
       },
     });
 
