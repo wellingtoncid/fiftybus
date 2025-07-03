@@ -5,14 +5,26 @@ import { isAuthenticated } from './middlewares/authMiddleware';
 import { apiLimiter } from './middlewares/rateLimiterMiddleware';
 import { setupSwagger } from './docs/swagger';
 
+import authRoutes from './routes/authRoutes';
+import exportRoutes from './routes/exportRoutes';
+
 const app = express();
 
 app.use(express.json());
-app.use('/api', router);
-app.use(isAuthenticated); // já protege todas as rotas abaixo
-app.use(auditMiddleware); // salva todos os acessos autenticados
-app.use('/api', apiLimiter);
 
+// 🔓 Public routes
+app.use('/api/auth', authRoutes);
+app.use('/api/exports', exportRoutes);
+
+// 🔒 Middlewares protected
+app.use('/api', isAuthenticated);        // verifica se o usuário está autenticado
+app.use('/api', auditMiddleware);        // logs só de quem está autenticado
+app.use('/api', apiLimiter);             // limitar chamadas autenticadas
+
+// 🔐 Protected routes
+app.use('/api', router);
+
+// 📄 Docs
 setupSwagger(app);
 
 export default app;

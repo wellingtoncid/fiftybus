@@ -13,10 +13,8 @@ import reviewRoutes from './routes/reviewRoutes';
 import reportRoutes from './routes/reportRoutes';
 import checklistRoutes from './routes/checklistRoutes';
 import adminReportRoutes from './routes/adminReportRoutes';
-import authRoutes from './routes/authRoutes';
 import protectedTestRoutes from './routes/protectedTestRoute';
 import auditLogRoutes from './routes/auditLogRoutes';
-import exportRoutes from './routes/exportRoutes';
 
 const router = express.Router();
 
@@ -73,16 +71,10 @@ router.use('/reports', reportRoutes);
 // Admin Report Routes
 router.use('/admin-reports', adminReportRoutes);
 
-// Authentication
-router.use('/auth', authRoutes);
-
 // Protected Test Routes
 router.use('/protected', protectedTestRoutes);
 
 // Audit Logs
 router.use('/admin', auditLogRoutes);
-
-// Export Routes
-router.use('/exports', exportRoutes);
 
 export default router;
