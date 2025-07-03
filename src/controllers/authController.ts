@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { authService } from '../services/authService';
+import { registerSchema } from "../schemas/authSchema";
 
 export async function login(req: Request, res: Response) {
   try {
@@ -11,11 +12,17 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-export async function register(req: Request, res: Response) {
+export const register = async (req: Request, res: Response) => {
   try {
-    const user = await authService.register(req.body);
-    res.status(201).json(user);
-  } catch (e) {
-    res.status(400).json({ error: 'Erro ao registrar usuário' });
+    const data = registerSchema.parse(req.body); // validação aqui
+    const user = await authService.register(data);
+    return res.status(201).json(user);
+  } catch (error: any) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({ error: error.errors });
+    }
+
+    console.error("Erro no register:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
-}
+};

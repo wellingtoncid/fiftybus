@@ -1,24 +1,36 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { userService } from '../services/userService';
+import { authService } from '../services/authService';
+import { createUserSchema } from "../schemas/authSchema";
 
 const prisma = new PrismaClient();
 
 const userController = {
   async createUser(req: Request, res: Response) {
     try {
-      const { name, email, password } = req.body;
+      const data = createUserSchema.parse(req.body);
 
-      if (!password) {
-        return res.status(400).json({ error: 'Password is required' });
+      if (!req.user) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
       }
-      
-      const user = await userService.createUser({ name, email, password });
+
+      const createdBy = {
+        id: req.user.id,
+        role: req.user.role,
+      };
+
+      const user = await authService.createUser({ ...data, createdBy });
+
       res.locals.entityId = user.id;
       res.locals.metadata = { name: user.name, email: user.email };
-      res.status(201).json(user);
-    } catch (err) {
-      res.status(400).json({ error: "Failed to create user", details: err });
+
+      return res.status(201).json(user);
+    } catch (err: any) {
+      if (err.name === "ZodError") {
+        return res.status(400).json({ error: "Dados inválidos", issues: err.errors });
+      }
+
+      return res.status(403).json({ error: "Não autorizado", details: err.message });
     }
   },
 

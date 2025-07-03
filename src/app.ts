@@ -4,6 +4,7 @@ import { auditMiddleware } from './middlewares/auditMiddleware';
 import { isAuthenticated } from './middlewares/authMiddleware';
 import { apiLimiter } from './middlewares/rateLimiterMiddleware';
 import { setupSwagger } from './docs/swagger';
+import userRoutes from './routes/userRoutes';
 
 import authRoutes from './routes/authRoutes';
 import exportRoutes from './routes/exportRoutes';
@@ -15,6 +16,7 @@ app.use(express.json());
 // 🔓 Public routes
 app.use('/api/auth', authRoutes);
 app.use('/api/exports', exportRoutes);
+app.use('/api/users', isAuthenticated, auditMiddleware, userRoutes);
 
 // 🔒 Middlewares protected
 app.use('/api', isAuthenticated);        // verifica se o usuário está autenticado
