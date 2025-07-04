@@ -19,15 +19,24 @@ export const authService = {
   },
 
   async register(data: { name: string; email: string; password: string; role?: string }) {
+    console.log('[authService.register] Dados recebidos (antes do ajuste de role):', data);
+
+    const exists = await prisma.user.findUnique({ where: { email: data.email } });
+      if (exists) {
+        throw new Error('Já existe um usuário com esse e-mail');
+      }
+
     const hashed = await bcrypt.hash(data.password, 10);
+
+    // Força o papel passenger sempre que for via register público
+    const roleToAssign: UserRole = 'passenger';
+
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
         passwordHash: hashed,
-        role: Object.values(UserRole).includes(data.role as UserRole)
-          ? (data.role as UserRole)
-          : 'passenger',
+        role: roleToAssign,
       },
     });
 

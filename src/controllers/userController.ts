@@ -30,6 +30,7 @@ const userController = {
         return res.status(400).json({ error: "Dados inválidos", issues: err.errors });
       }
 
+      console.error("Erro ao criar usuário:", err);
       return res.status(403).json({ error: "Não autorizado", details: err.message });
     }
   },

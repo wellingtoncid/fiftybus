@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx,json,md}'",
+    "seed": "ts-node prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "devDependencies": {
