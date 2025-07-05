@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from "cors"
 import router from './routes';
 import { auditMiddleware } from './middlewares/auditMiddleware';
 import { isAuthenticated } from './middlewares/authMiddleware';
@@ -9,7 +10,15 @@ import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import exportRoutes from './routes/exportRoutes';
 
+
 const app = express();
+
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://fiftybus.vercel.app"],
+    credentials: true,
+  })
+)
 
 app.use(express.json());
 
