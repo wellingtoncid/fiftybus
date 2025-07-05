@@ -26,6 +26,9 @@ app.use('/api', apiLimiter);             // limitar chamadas autenticadas
 // 🔐 Protected routes
 app.use('/api', router);
 
+// 🛠️ Health check route
+app.get('/health', (_req, res) => res.send('OK'));
+
 // 📄 Docs
 setupSwagger(app);
 
