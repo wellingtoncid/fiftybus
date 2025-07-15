@@ -15,7 +15,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://fiftybus.vercel.app"],
+    origin: ["http://localhost:4000", "https://fiftybus.vercel.app"],
     credentials: true,
   })
 )
